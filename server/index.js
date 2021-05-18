@@ -8,7 +8,7 @@ async function main() {
     const signer = provider.getSigner()
     const contract = new ethers.Contract(address, abi, signer)
     
-    contract.on("OnTest", (from, to, amount, event) => {
+    contract.on("onPromote", (from, to, amount, event) => {
         console.log({ from, to, amount, event })
     })
 
