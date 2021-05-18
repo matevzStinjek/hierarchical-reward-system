@@ -5,7 +5,8 @@
   "scripts": {
     "test": "npx hardhat test",
     "node:local": "npx hardhat node",
-    "deploy:local": "npx hardhat run scripts/deploy-hrs.js --network localhost"
+    "deploy:local": "npx hardhat run scripts/deploy-hrs.js --network localhost",
+    "server": "node server/index.js"
   },
   "dependencies": {
     "@openzeppelin/contracts": "4.1.0",
