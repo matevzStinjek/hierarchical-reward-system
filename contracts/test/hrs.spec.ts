@@ -114,11 +114,17 @@ describe("HRS", () => {
 
   it("should go up the hierarchy and award each superior a fraction of the inferior's", async () => {
     await contract.reward(F, 1000);
-    // F gets 1000
-    // D gets 200
-    // B gets 40
-    // A gets 8
-    // uncomment console.log HRS.sol:128 for example
+
+    const expectedPoints = [
+      [ contract.getPointsOf(F), 1000 ],
+      [ contract.getPointsOf(D),  200 ],
+      [ contract.getPointsOf(B),   40 ],
+      [ contract.getPointsOf(A),    8 ],
+    ];
+
+    const [promises, expected] = transpose(expectedPoints);
+    const points = await Promise.all(promises);
+    expect(points).to.have.ordered.members(expected);
   });
 });
 
