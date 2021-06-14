@@ -25,8 +25,9 @@ describe("HRS", () => {
   let contract: HRSTest;
 
   before("setup the factory", async () => {
-    [deployer, A, B, C, D, E, F, G] = (await hardhat.ethers.getSigners()).map(({ address }) => address);
-    principal = (await hardhat.ethers.getSigners())[1];
+    const signers = await hardhat.ethers.getSigners();
+    [deployer, A, B, C, D, E, F, G] = signers.map(({ address }) => address);
+    principal = signers[1];
 
     superiorToInferiors = [
       [ A, [B, C] ],
