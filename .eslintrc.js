@@ -14,12 +14,16 @@ module.exports = {
   globals: {
     ethers: 'readonly',
     hre: 'readonly',
+    task: 'readonly',
   },
   rules: {
     'import/no-unresolved': 0,
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
     '@typescript-eslint/no-explicit-any': 'off',
+    "@typescript-eslint/indent": ['error', 2, { 'SwitchCase': 1 }],
+    '@typescript-eslint/semi': 'error',
+    '@typescript-eslint/quotes': ['error', 'double', { 'avoidEscape': true, 'allowTemplateLiterals': true }]
   },
   parserOptions: {
     project: './tsconfig.json',

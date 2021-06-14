@@ -3,7 +3,7 @@
 //
 // When running the script with `hardhat run <script>` you'll find the Hardhat
 // Runtime Environment's members available in the global scope.
-const hre = require("hardhat");
+import hre from "hardhat";
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -14,10 +14,10 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to attack
-  const Greeter = await ethers.getContractFactory("Greeter")
-  const greeter = await Greeter.attach("0x5FbDB2315678afecb367f032d93F642f64180aa3")
+  const Greeter = await ethers.getContractFactory("Greeter");
+  const greeter = await Greeter.attach("0x5FbDB2315678afecb367f032d93F642f64180aa3");
 
-  const data = await greeter.greet()
+  const data = await greeter.greet();
 
   console.log("Greet:", data);
 }
