@@ -46,6 +46,8 @@ contract HRS {
 
     mapping(address => uint8) agentToLevel;
 
+    mapping(address => uint24) agentToPoints;
+
     constructor(
         SuperiorToInferiorsDTO[] memory _superiorToInferiors,
         InferiorToSuperiorDTO[] memory _inferiorToSuperior,
@@ -123,9 +125,8 @@ contract HRS {
         emit onPromote(_agent, _newLevel, _newSuperior, newSuperiorInferiors, oldSuperior, newInferiors);
     }
 
-    function reward(address _agent, uint amount) public {
-        // payable(address).send(...)
-        // console.log(_agent, "gets", amount);
+    function reward(address _agent, uint24 amount) public {
+        agentToPoints[_agent] += amount;
         address superior = inferiorToSuperior[_agent];
         bool isSuperiorSet = superior != address(0);
         if (isSuperiorSet) {
@@ -153,5 +154,9 @@ contract HRSTest is HRS {
 
     function getLevelOf(address _agent) external view returns (uint8) {
         return agentToLevel[_agent];
+    }
+
+    function getPointsOf(address _agent) external view returns (uint24) {
+        return agentToPoints[_agent];
     }
 }
