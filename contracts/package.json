@@ -8,9 +8,8 @@
     "test:no-compile": "npx hardhat test",
     "node:local": "npx hardhat node",
     "deploy:local": "npx hardhat run scripts/deploy-hrs.ts --network localhost",
-    "listeners": "node listeners/index.ts",
-    "lint": "eslint listeners scripts tasks test",
-    "lint:fix": "eslint listeners scripts tasks test --fix"
+    "lint": "eslint scripts tasks test",
+    "lint:fix": "eslint scripts tasks test --fix"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
