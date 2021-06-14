@@ -8,6 +8,7 @@
     "test:no-compile": "npx hardhat test",
     "node:local": "npx hardhat node",
     "deploy:local": "npx hardhat run scripts/deploy-hrs.ts --network localhost",
+    "interact:local": "npx hardhat run scripts/sample-interact.ts --network localhost",
     "lint": "eslint scripts tasks test",
     "lint:fix": "eslint scripts tasks test --fix"
   },
