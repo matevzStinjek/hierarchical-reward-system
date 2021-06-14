@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "test": "yarn compile && npx hardhat test",
+    "test:no-compile": "npx hardhat test",
     "node:local": "npx hardhat node",
     "deploy:local": "npx hardhat run scripts/deploy-hrs.js --network localhost",
     "listeners": "node listeners/index.js"
