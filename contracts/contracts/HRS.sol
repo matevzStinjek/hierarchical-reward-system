@@ -143,15 +143,15 @@ contract HRSTest is HRS {
         address _principal
     ) HRS(_superiorToInferiors, _inferiorToSuperior, _agentLevels, _principal) {}
 
-    function getSuperiorOf(address inferior) external view returns (address) {
-        return inferiorToSuperior[inferior];
+    function getSuperiorOf(address _inferior) external view returns (address) {
+        return inferiorToSuperior[_inferior];
     }
 
-    function getInferiorsOf(address superior) external view returns (address[] memory) {
-        return superiorToInferiors[superior];
+    function getInferiorsOf(address _superior) external view returns (address[] memory) {
+        return superiorToInferiors[_superior];
     }
 
-    function getLevelOf(address agent) external view returns (uint8) {
-        return agentToLevel[agent];
+    function getLevelOf(address _agent) external view returns (uint8) {
+        return agentToLevel[_agent];
     }
 }
