@@ -1,7 +1,9 @@
 import hre from "hardhat";
 
 async function main() {
-  const [, A, B, C, D, E, F, G] = (await hre.ethers.getSigners()).map(({ address }) => address);
+  const signers = await hre.ethers.getSigners();
+  const [, A, B, C, D, E, F, G] = signers.map(({ address }) => address);
+  const principal = signers[1];
 
   const superiorToInferiors = [
     [ A, [B, C] ],
@@ -27,11 +29,14 @@ async function main() {
   ];
 
   const HRSFactory = await hre.ethers.getContractFactory("HRS");
-  const hrs = await HRSFactory.deploy(superiorToInferiors, inferiorToSuperior, agentLevels);
+  const hrs = await HRSFactory.deploy(superiorToInferiors, inferiorToSuperior, agentLevels,  principal.address);
 
   await hrs.deployed();
 
   console.log("HRS deployed to:", hrs.address);
 }
 
-main().then(() => process.exit(0)).catch(error => console.error(error) && process.exit(1));
+main().then(() => process.exit(0)).catch(error => {
+  console.error(error);
+  process.exit(1);
+});
