@@ -8,7 +8,9 @@
     "test:no-compile": "npx hardhat test",
     "node:local": "npx hardhat node",
     "deploy:local": "npx hardhat run scripts/deploy-hrs.js --network localhost",
-    "listeners": "node listeners/index.js"
+    "listeners": "node listeners/index.js",
+    "lint": "eslint listeners scripts tasks test",
+    "lint:fix": "eslint listeners scripts tasks test --fix"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
@@ -19,7 +21,10 @@
     "@types/chai": "4.2.18",
     "@types/mocha": "8.2.2",
     "@types/node": "15.12.2",
+    "@typescript-eslint/eslint-plugin": "4.26.1",
+    "@typescript-eslint/parser": "4.26.1",
     "chai": "4.3.4",
+    "eslint": "7.28.0",
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0",
     "hardhat": "2.3.3",
