@@ -1,4 +1,8 @@
-import expect from "chai";
+import { ContractFactory } from "@ethersproject/contracts";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { HRSTest } from "../typechain/HRSTest";
+import { expect } from "chai";
+import * as hardhat from "hardhat";
 
 /**
  * Structure
@@ -12,17 +16,17 @@ import expect from "chai";
  * 3:  F   G
  */
 
-describe("HRS", function() {
+describe("HRS", () => {
 
-  let deployer, A, B, C, D, E, F, G;
-  let principal;
-  let superiorToInferiors, inferiorToSuperior, agentLevels;
-  let contractFactory;
-  let contract;
+  let [deployer, A, B, C, D, E, F, G]: string[] = [];
+  let principal: SignerWithAddress;
+  let [superiorToInferiors, inferiorToSuperior, agentLevels]: any[][] = [];
+  let contractFactory: ContractFactory;
+  let contract: HRSTest;
 
-  before("setup the factory", async function() {
-    [deployer, A, B, C, D, E, F, G] = (await ethers.getSigners()).map(({ address }) => address);
-    principal = (await ethers.getSigners())[1];
+  before("setup the factory", async () => {
+    [deployer, A, B, C, D, E, F, G] = (await hardhat.ethers.getSigners()).map(({ address }) => address);
+    principal = (await hardhat.ethers.getSigners())[1];
 
     superiorToInferiors = [
       [ A, [B, C] ],
@@ -47,21 +51,21 @@ describe("HRS", function() {
       [ G, 3 ],
     ];
         
-    contractFactory = await ethers.getContractFactory("HRSTest");
+    contractFactory = await hardhat.ethers.getContractFactory("HRSTest");
   });
 
-  beforeEach("setup the contract", async function() {
-    contract = await contractFactory.deploy(superiorToInferiors, inferiorToSuperior, agentLevels, principal.address);
+  beforeEach("setup the contract", async () => {
+    contract = (await contractFactory.deploy(superiorToInferiors, inferiorToSuperior, agentLevels, principal.address) as HRSTest);
     await contract.deployed();
   });
 
-  it("deployer of the contract should be its owner", async function() {
+  it("deployer of the contract should be its owner", async () => {
     const contractOwner = await contract.getOwner();
 
     expect(contractOwner).to.equal(deployer);
   });
 
-  it("should build a hierarchy structure", async function() {
+  it("should build a hierarchy structure", async () => {
     const pairs = [
       [ contract.getSuperiorOf(B), A ],
       [ contract.getSuperiorOf(C), A ],
@@ -85,7 +89,7 @@ describe("HRS", function() {
     expect(inferiorsC).to.have.members([F, G]);
   });
 
-  it("should assign agents their coresponding levels", async function() {
+  it("should assign agents their coresponding levels", async () => {
     const pairs = [
       [ contract.getLevelOf(A), 0 ],
       [ contract.getLevelOf(B), 1 ],
@@ -100,14 +104,14 @@ describe("HRS", function() {
     expect(fetched).to.have.ordered.members(expected);
   });
 
-  it("should correctly reassign relationships and levels on promotion", async function() {
+  it("should correctly reassign relationships and levels on promotion", async () => {
     await contract.connect(principal).promote(D, 1, A);
 
     expect(await contract.getLevelOf(D)).to.be.equal(1);
     // TODO: test new superior, new superior's inferiors, old superior's inferiors, emitted event
   });
 
-  it("should go up the hierarchy and award each superior a fraction of the inferior's", async function() {
+  it("should go up the hierarchy and award each superior a fraction of the inferior's", async () => {
     await contract.reward(F, 1000);
     // F gets 1000
     // D gets 200
@@ -117,6 +121,6 @@ describe("HRS", function() {
   });
 });
 
-function transpose (a) {
-  return a[0].map((_, c) => a.map(r => r[c]));
+function transpose (a: any) {
+  return a[0].map((_: any, c: any) => a.map((r: any) => r[c]));
 }
