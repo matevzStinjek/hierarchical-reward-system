@@ -2,15 +2,15 @@ A reward system for companies with a hierarchical structure implemented with sma
 
 ## Test
 
-```yarn run test```
+```yarn test```
 
 ## Deploy to localhost
-```yarn run node:local```
+```yarn node:local```
 
 in another tab
 
-```yarn run deploy:local```
+```yarn deploy:local```
 
 to run the listeners
 
-```yarn run listeners```
+```yarn listeners```
