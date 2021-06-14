@@ -1,5 +1,5 @@
 import { ContractFactory } from "@ethersproject/contracts";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { HRSTest } from "../typechain/HRSTest";
 import { expect } from "chai";
 import * as hardhat from "hardhat";
