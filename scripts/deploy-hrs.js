@@ -2,17 +2,20 @@ const hre = require("hardhat")
 
 
 async function main() {
-    const [deployer, A, B, C, D, E] = (await hre.ethers.getSigners()).map(({ address }) => address)
+    const [deployer, A, B, C, D, E, F, G] = (await hre.ethers.getSigners()).map(({ address }) => address)
 
     const superiorToInferiors = [
         [ A, [B, C] ],
         [ B, [D, E] ],
+        [ D, [F, G] ],
     ]
     const inferiorToSuperior = [
         [ B, A ],
         [ C, A ],
         [ D, B ],
         [ E, B ],
+        [ F, D ],
+        [ G, D ],
     ]
     const agentLevels = [
         [ A, 0 ],
@@ -20,6 +23,8 @@ async function main() {
         [ C, 1 ],
         [ D, 2 ],
         [ E, 2 ],
+        [ F, 3 ],
+        [ G, 3 ],
     ]
 
   const HRSFactory = await hre.ethers.getContractFactory("HRS")
