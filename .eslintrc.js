@@ -17,7 +17,6 @@ module.exports = {
     task: 'readonly',
   },
   rules: {
-    'import/no-unresolved': 0,
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/comma-dangle': ['error', 'always-multiline'],
     '@typescript-eslint/no-explicit-any': 'off',
