@@ -1,31 +1,22 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional 
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
 import * as hardhat from "hardhat";
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile 
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
-
-  // We get the contract to attack
   const HRS = await hardhat.ethers.getContractFactory("HRS");
   const hrs = await HRS.attach("0x5fbdb2315678afecb367f032d93f642f64180aa3");
 
-  const data = await hrs.getOwner();
+  const signers = await hardhat.ethers.getSigners();
+  const [, A, , , D] = signers.map(({ address }) => address);
+  const principal = signers[1];
+  await hrs.connect(principal).promote(D, 1, A);
 
-  console.log("Greet:", data);
+  return "Promoted D to level 1";
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main()
-  .then(() => process.exit(0))
+  .then(message => {
+    console.log(message);
+    process.exit(0);
+  })
   .catch(error => {
     console.error(error);
     process.exit(1);
