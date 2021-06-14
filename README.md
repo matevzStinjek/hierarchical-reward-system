@@ -11,6 +11,6 @@ in another tab
 
 ```yarn run deploy:local```
 
-to run the server
+to run the listeners
 
-```yarn run server```
+```yarn run listeners```

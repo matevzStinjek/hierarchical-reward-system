@@ -6,7 +6,7 @@
     "test": "npx hardhat test",
     "node:local": "npx hardhat node",
     "deploy:local": "npx hardhat run scripts/deploy-hrs.js --network localhost",
-    "server": "node server/index.js"
+    "listeners": "node listeners/index.js"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
