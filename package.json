@@ -8,7 +8,7 @@
     "test:no-compile": "npx hardhat test",
     "node:local": "npx hardhat node",
     "deploy:local": "npx hardhat run scripts/deploy-hrs.js --network localhost",
-    "listeners": "node listeners/index.js",
+    "listeners": "node listeners/index.ts",
     "lint": "eslint listeners scripts tasks test",
     "lint:fix": "eslint listeners scripts tasks test --fix"
   },
