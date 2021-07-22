@@ -1,5 +1,5 @@
-import '@typechain/hardhat';
-import '@nomiclabs/hardhat-ethers';
+import "@typechain/hardhat";
+import "@nomiclabs/hardhat-ethers";
 import { HardhatUserConfig } from "hardhat/config";
 import "./tasks/accounts";
 
