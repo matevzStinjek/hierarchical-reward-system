@@ -24,7 +24,7 @@ contract HRS {
 
     using SafeMath for uint;
 
-    event onPromote(address agent, uint8 newLevel, address newSuperior, address[] newSuperiorInferiors, address oldSuperior, address[] oldSuperiorInferiors);
+    event onPromote(address agent, uint8 newLevel, address newSuperior);
     // event onPointsReceived
     // event onPrincipalChanged
     // event onRelationshipChanged / onPromotion
@@ -121,8 +121,7 @@ contract HRS {
         // update the agent's level
         agentToLevel[_agent] = _newLevel;
 
-        address[] memory newSuperiorInferiors = superiorToInferiors[_newSuperior];
-        emit onPromote(_agent, _newLevel, _newSuperior, newSuperiorInferiors, oldSuperior, newInferiors);
+        emit onPromote(_agent, _newLevel, _newSuperior);
     }
 
     function reward(address _agent, uint24 amount) public {
