@@ -1,8 +1,13 @@
 import { ContractFactory } from "@ethersproject/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
+import { solidity } from "ethereum-waffle";
+import { without } from "lodash";
 import { HRSTest } from "../typechain/HRSTest";
-import { expect } from "chai";
+import chai from "chai";
 import * as hardhat from "hardhat";
+
+chai.use(solidity);
+const { expect } = chai;
 
 /**
  * Structure
@@ -106,10 +111,29 @@ describe("HRS", () => {
   });
 
   it("should correctly reassign relationships and levels on promotion", async () => {
-    await contract.connect(principal).promote(D, 1, A);
+    const _newLevel = 1;
+    const _promotedAgent = D;
+    const _newSuperior = A;
+    const _oldSuperior = await contract.getSuperiorOf(_promotedAgent);
+    const _newSuperiorOldInferiors = await contract.getInferiorsOf(_newSuperior);
+    const _oldSuperiorOldsInferiors = await contract.getInferiorsOf(_oldSuperior);
 
-    expect(await contract.getLevelOf(D)).to.be.equal(1);
-    // TODO: test new superior, new superior's inferiors, old superior's inferiors, emitted event
+    const promote = contract.connect(principal).promote(_promotedAgent, _newLevel, _newSuperior);
+
+    expect(promote).to.emit(contract, "onPromote").withArgs(_promotedAgent, _newLevel, _newSuperior);
+
+    await promote;
+    contract.getLevelOf(_promotedAgent)
+      .then(newLevel => expect(newLevel).to.be.equal(_newLevel));
+    
+    contract.getSuperiorOf(_promotedAgent)
+      .then(newSuperior => expect(newSuperior).to.be.equal(_newSuperior));
+
+    contract.getInferiorsOf(_newSuperior)
+      .then(newSuperiorInferiors => expect(newSuperiorInferiors).to.have.all.members([..._newSuperiorOldInferiors, _promotedAgent]));
+    
+    contract.getInferiorsOf(_oldSuperior)
+      .then(oldSuperiorInferiors => expect(oldSuperiorInferiors).to.have.all.members(without(_oldSuperiorOldsInferiors, _promotedAgent)));
   });
 
   it("should go up the hierarchy and award each superior a fraction of the inferior's", async () => {
