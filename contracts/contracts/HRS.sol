@@ -104,7 +104,7 @@ contract HRS {
         address[] memory oldInferiors = superiorToInferiors[oldSuperior];
         address[] memory newInferiors = new address[](oldInferiors.length - 1);
         uint count = 0;
-        for (uint i = 0; i < oldInferiors.length - 1; i++) {
+        for (uint i = 0; i < oldInferiors.length; i++) {
             if (oldInferiors[i] != _agent) {
                 newInferiors[count] = oldInferiors[i];
                 count++;
