@@ -15,7 +15,7 @@
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
-    "@openzeppelin/contracts": "4.1.0",
+    "@openzeppelin/contracts": "4.3.2",
     "@typechain/ethers-v5": "7.0.1",
     "@typechain/hardhat": "2.0.2",
     "@types/chai": "4.2.18",

@@ -1,8 +1,9 @@
 import { ContractFactory } from "@ethersproject/contracts";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
+import { ethers } from "ethers";
 import { solidity } from "ethereum-waffle";
 import { without } from "lodash";
-import { HRSTest } from "../typechain/HRSTest";
+import { HRS } from "../typechain/HRS";
 import chai from "chai";
 import * as hardhat from "hardhat";
 
@@ -27,7 +28,7 @@ describe("HRS", () => {
   let principal: SignerWithAddress;
   let [superiorToInferiors, inferiorToSuperior, agentLevels]: any[][] = [];
   let contractFactory: ContractFactory;
-  let contract: HRSTest;
+  let contract: HRS;
 
   before("setup the factory", async () => {
     const signers = await hardhat.ethers.getSigners();
@@ -57,18 +58,25 @@ describe("HRS", () => {
       [ G, 3 ],
     ];
         
-    contractFactory = await hardhat.ethers.getContractFactory("HRSTest");
+    contractFactory = await hardhat.ethers.getContractFactory("HRS");
   });
 
   beforeEach("setup the contract", async () => {
-    contract = (await contractFactory.deploy(superiorToInferiors, inferiorToSuperior, agentLevels, principal.address) as HRSTest);
+    contract = (await contractFactory.deploy(superiorToInferiors, inferiorToSuperior, agentLevels, principal.address) as HRS);
     await contract.deployed();
   });
 
-  it("deployer of the contract should be its owner", async () => {
-    const contractOwner = await contract.getOwner();
+  it("should confirm (TODO) deployer the admin of the contract and A is the principal", async () => {
+    const { id } = ethers.utils;
+    // const { id, formatBytes32String } = ethers.utils;
+    // const DEFAULT_ADMIN_ROLE = formatBytes32String("0x00");
+    const PRINCIPAL_ROLE = id("PRINCIPAL_ROLE");
 
-    expect(contractOwner).to.equal(deployer);
+    // const isDeployerAdmin = await contract.hasRole(DEFAULT_ADMIN_ROLE, deployer);
+    const isAPrincipal = await contract.hasRole(PRINCIPAL_ROLE, A);
+
+    // expect(isDeployerAdmin, "deployer is admin").to.be.true;
+    expect(isAPrincipal, "A is principal").to.be.true;
   });
 
   it("should build a hierarchy structure", async () => {
@@ -125,30 +133,15 @@ describe("HRS", () => {
     await promote;
     contract.getLevelOf(_promotedAgent)
       .then(newLevel => expect(newLevel).to.be.equal(_newLevel));
-    
+
     contract.getSuperiorOf(_promotedAgent)
       .then(newSuperior => expect(newSuperior).to.be.equal(_newSuperior));
 
     contract.getInferiorsOf(_newSuperior)
       .then(newSuperiorInferiors => expect(newSuperiorInferiors).to.have.all.members([..._newSuperiorOldInferiors, _promotedAgent]));
-    
+
     contract.getInferiorsOf(_oldSuperior)
       .then(oldSuperiorInferiors => expect(oldSuperiorInferiors).to.have.all.members(without(_oldSuperiorOldsInferiors, _promotedAgent)));
-  });
-
-  it("should go up the hierarchy and award each superior a fraction of the inferior's", async () => {
-    await contract.reward(F, 1000);
-
-    const expectedPoints = [
-      [ contract.getPointsOf(F), 1000 ],
-      [ contract.getPointsOf(D),  200 ],
-      [ contract.getPointsOf(B),   40 ],
-      [ contract.getPointsOf(A),    8 ],
-    ];
-
-    const [promises, expected] = transpose(expectedPoints);
-    const points = await Promise.all(promises);
-    expect(points).to.have.ordered.members(expected);
   });
 });
 
