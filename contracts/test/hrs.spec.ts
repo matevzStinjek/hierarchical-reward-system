@@ -24,7 +24,7 @@ const { expect } = chai;
 
 describe("HRS", () => {
 
-  let [deployer, A, B, C, D, E, F, G]: string[] = [];
+  let [/* deployer */, A, B, C, D, E, F, G]: string[] = [];
   let principal: SignerWithAddress;
   let [superiorToInferiors, inferiorToSuperior, agentLevels]: any[][] = [];
   let contractFactory: ContractFactory;
@@ -32,7 +32,7 @@ describe("HRS", () => {
 
   before("setup the factory", async () => {
     const signers = await hardhat.ethers.getSigners();
-    [deployer, A, B, C, D, E, F, G] = signers.map(({ address }) => address);
+    [/* deployer */, A, B, C, D, E, F, G] = signers.map(({ address }) => address);
     principal = signers[1];
 
     superiorToInferiors = [
@@ -103,7 +103,7 @@ describe("HRS", () => {
     expect(inferiorsC).to.have.members([F, G]);
   });
 
-  it("should assign agents their coresponding levels", async () => {
+  it("should assign agents their corresponding levels", async () => {
     const pairs = [
       [ contract.getLevelOf(A), 0 ],
       [ contract.getLevelOf(B), 1 ],

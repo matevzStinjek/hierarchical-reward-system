@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./HRSRewardController.sol";
 
 struct AgentLevelDTO {
     address agentAddress;
@@ -20,13 +18,10 @@ struct InferiorToSuperiorDTO {
     address superior;
 }
 
-contract HRSHierarchyController is AccessControl {
-
-    using SafeMath for *;
-
-    bytes32 public constant PRINCIPAL_ROLE = keccak256("PRINCIPAL_ROLE");
+contract HRSHierarchyController is HRSRewardController {
     
     event onPromote(address agent, uint8 newLevel, address newSuperior);
+    // event onRelationshipChanged / onPromotion
 
     mapping(address => address) inferiorToSuperior;
     mapping(address => address[]) superiorToInferiors;
@@ -37,8 +32,9 @@ contract HRSHierarchyController is AccessControl {
     constructor(
         SuperiorToInferiorsDTO[] memory _superiorToInferiors,
         InferiorToSuperiorDTO[] memory _inferiorToSuperior,
-        AgentLevelDTO[] memory _agentLevels
-    ) {
+        AgentLevelDTO[] memory _agentLevels,
+        address _principal
+    ) HRSRewardController(_principal) {
         initHierarchy(_superiorToInferiors, _inferiorToSuperior);
         initAgentLevels(_agentLevels);
     }
@@ -48,14 +44,13 @@ contract HRSHierarchyController is AccessControl {
         InferiorToSuperiorDTO[] memory _inferiorToSuperior
     ) internal {
         // populate superiorToInferiors mapping
-        for (uint i = 0; i < _superiorToInferiors.length; i++) {
-            address superior = _superiorToInferiors[i].superior;
+        for (uint i; i < _superiorToInferiors.length; i++) {
             address[] memory inferiors = _superiorToInferiors[i].inferiors;
-            superiorToInferiors[superior] = inferiors;
+            superiorToInferiors[_superiorToInferiors[i].superior] = inferiors;
         }
 
         // populate inferiorToSuperior mapping
-        for (uint i = 0; i < _inferiorToSuperior.length; i++) {
+        for (uint i; i < _inferiorToSuperior.length; i++) {
             address inferior = _inferiorToSuperior[i].inferior;
             address superior = _inferiorToSuperior[i].superior;
             inferiorToSuperior[inferior] = superior;
