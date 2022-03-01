@@ -1,39 +1,40 @@
 import { ContractFactory } from "@ethersproject/contracts";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/dist/src/signers";
 import { ethers } from "ethers";
 import { solidity } from "ethereum-waffle";
 import { without } from "lodash";
-import { HRS } from "../typechain/HRS";
+import { Controller } from "../typechain/Controller";
 import chai from "chai";
 import * as hardhat from "hardhat";
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 chai.use(solidity);
 const { expect } = chai;
 
 /**
- * Structure
+ * Initial Structure
  * 
- * 0:        A
+ * 1:        A
  *          / \
- * 1:      B   C
+ * 2:      B   C
  *        / \
- * 2:    D   E
+ * 3:    D   E
  *      / \
- * 3:  F   G
+ * 4:  F   G
  */
 
-describe("HRS", () => {
+describe("Controller", () => {
 
-  let [/* deployer */, A, B, C, D, E, F, G]: string[] = [];
-  let principal: SignerWithAddress;
+  let [deployer, A, B, C, D, E, F, G]: string[] = [];
+  let [principal, client]: SignerWithAddress[] = [];
   let [superiorToInferiors, inferiorToSuperior, agentLevels]: any[][] = [];
   let contractFactory: ContractFactory;
-  let contract: HRS;
+  let contract: Controller;
 
   before("setup the factory", async () => {
     const signers = await hardhat.ethers.getSigners();
-    [/* deployer */, A, B, C, D, E, F, G] = signers.map(({ address }) => address);
+    [deployer, A, B, C, D, E, F, G] = signers.map(({ address }) => address);
     principal = signers[1];
+    client = signers[8];
 
     superiorToInferiors = [
       [ A, [B, C] ],
@@ -49,33 +50,27 @@ describe("HRS", () => {
       [ G, D ],
     ];
     agentLevels = [
-      [ A, 0 ],
-      [ B, 1 ],
-      [ C, 1 ],
-      [ D, 2 ],
-      [ E, 2 ],
-      [ F, 3 ],
-      [ G, 3 ],
+      [ A, 1 ],
+      [ B, 2 ],
+      [ C, 2 ],
+      [ D, 3 ],
+      [ E, 3 ],
+      [ F, 4 ],
+      [ G, 4 ],
     ];
-        
-    contractFactory = await hardhat.ethers.getContractFactory("HRS");
+
+    contractFactory = await hardhat.ethers.getContractFactory("Controller");
   });
 
   beforeEach("setup the contract", async () => {
-    contract = (await contractFactory.deploy(superiorToInferiors, inferiorToSuperior, agentLevels, principal.address) as HRS);
+    contract = await contractFactory.deploy(superiorToInferiors, inferiorToSuperior, agentLevels, principal.address) as Controller;
     await contract.deployed();
   });
 
-  it("should confirm (TODO) deployer the admin of the contract and A is the principal", async () => {
+  it("should confirm A is the principal", async () => {
     const { id } = ethers.utils;
-    // const { id, formatBytes32String } = ethers.utils;
-    // const DEFAULT_ADMIN_ROLE = formatBytes32String("0x00");
     const PRINCIPAL_ROLE = id("PRINCIPAL_ROLE");
-
-    // const isDeployerAdmin = await contract.hasRole(DEFAULT_ADMIN_ROLE, deployer);
     const isAPrincipal = await contract.hasRole(PRINCIPAL_ROLE, A);
-
-    // expect(isDeployerAdmin, "deployer is admin").to.be.true;
     expect(isAPrincipal, "A is principal").to.be.true;
   });
 
@@ -105,43 +100,79 @@ describe("HRS", () => {
 
   it("should assign agents their corresponding levels", async () => {
     const pairs = [
-      [ contract.getLevelOf(A), 0 ],
-      [ contract.getLevelOf(B), 1 ],
-      [ contract.getLevelOf(C), 1 ],
-      [ contract.getLevelOf(D), 2 ],
-      [ contract.getLevelOf(E), 2 ],
-      [ contract.getLevelOf(F), 3 ],
-      [ contract.getLevelOf(G), 3 ],
+      [ contract.agentToLevel(A), 1 ],
+      [ contract.agentToLevel(B), 2 ],
+      [ contract.agentToLevel(C), 2 ],
+      [ contract.agentToLevel(D), 3 ],
+      [ contract.agentToLevel(E), 3 ],
+      [ contract.agentToLevel(F), 4 ],
+      [ contract.agentToLevel(G), 4 ],
     ];
     const [promises, expected] = transpose(pairs);
     const fetched = await Promise.all(promises);
     expect(fetched).to.have.ordered.members(expected);
   });
 
+  it("should correctly change a level", async () => {
+    const oldLevel = await contract.agentToLevel(A);
+    const desiredNewLevel = oldLevel + 1;
+    await contract.connect(principal).changeLevel(A, desiredNewLevel).then(tx => tx.wait())
+    const newLevel = await contract.agentToLevel(A);
+
+    expect(oldLevel).to.not.equal(newLevel);
+    expect(desiredNewLevel).to.equal(newLevel);
+  });
+
   it("should correctly reassign relationships and levels on promotion", async () => {
-    const _newLevel = 1;
     const _promotedAgent = D;
     const _newSuperior = A;
     const _oldSuperior = await contract.getSuperiorOf(_promotedAgent);
-    const _newSuperiorOldInferiors = await contract.getInferiorsOf(_newSuperior);
-    const _oldSuperiorOldsInferiors = await contract.getInferiorsOf(_oldSuperior);
+    const [_newSuperiorOldInferiors, _oldSuperiorOldsInferiors] = await Promise.all([
+      contract.getInferiorsOf(_newSuperior),
+      contract.getInferiorsOf(_oldSuperior),
+    ]);
 
-    const promote = contract.connect(principal).promote(_promotedAgent, _newLevel, _newSuperior);
-
-    expect(promote).to.emit(contract, "onPromote").withArgs(_promotedAgent, _newLevel, _newSuperior);
-
-    await promote;
-    contract.getLevelOf(_promotedAgent)
-      .then(newLevel => expect(newLevel).to.be.equal(_newLevel));
+    await contract.connect(principal).changeSuperior(_promotedAgent, _newSuperior).then((tx) => tx.wait())
 
     contract.getSuperiorOf(_promotedAgent)
-      .then(newSuperior => expect(newSuperior).to.be.equal(_newSuperior));
+      .then((newSuperior: string) => expect(newSuperior).to.be.equal(_newSuperior));
 
     contract.getInferiorsOf(_newSuperior)
-      .then(newSuperiorInferiors => expect(newSuperiorInferiors).to.have.all.members([..._newSuperiorOldInferiors, _promotedAgent]));
+      .then((newSuperiorInferiors: string[]) => expect(newSuperiorInferiors).to.have.all.members([..._newSuperiorOldInferiors, _promotedAgent]));
 
     contract.getInferiorsOf(_oldSuperior)
-      .then(oldSuperiorInferiors => expect(oldSuperiorInferiors).to.have.all.members(without(_oldSuperiorOldsInferiors, _promotedAgent)));
+      .then((oldSuperiorInferiors: string[]) => expect(oldSuperiorInferiors).to.have.all.members(without(_oldSuperiorOldsInferiors, _promotedAgent)));
+  });
+
+  it("should register a new policy, purchase the policy subscription and have the correct token distribution", async () => {
+    // register new policy
+    const { formatBytes32String, parseEther } = ethers.utils;
+    const name = formatBytes32String("Policy 1");
+    const description = formatBytes32String("Policies description");
+    const price = parseEther("1");
+
+    await contract.connect(principal).registerNewPolicy(name, description, price).then(tx => tx.wait());
+
+    const policy = await contract.policies(0);
+    expect(policy.name).to.equal(name);
+    expect(policy.description).to.equal(description);
+    expect(policy.price.eq(price)).to.be.true;
+
+    // pruchase the policy subscription
+    await contract.connect(client).registerNewSubscription(0, F, { value: parseEther("2") }).then(tx => tx.wait());
+
+    const subscription = await contract.subscriptions(client.address);
+    expect(subscription.expirationDate.toNumber()).to.be.greaterThan(Math.floor(new Date().getTime() / 1000));
+
+    // correct balances
+    expect((await contract.depositsOf(F)).eq(parseEther("0.8"))).to.be.true;
+    expect((await contract.depositsOf(D)).eq(parseEther("0.16"))).to.be.true;
+    expect((await contract.depositsOf(B)).eq(parseEther("0.032"))).to.be.true;
+    expect((await contract.depositsOf(A)).eq(parseEther("0.008"))).to.be.true;
+    
+    // withdraw as A
+    await contract.connect(principal).withdraw().then(tx => tx.wait());
+    expect((await contract.depositsOf(A)).eq(parseEther("0"))).to.be.true;
   });
 });
 
